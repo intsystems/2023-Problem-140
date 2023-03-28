@@ -18,5 +18,5 @@ class ResNet18(nn.Module):
         return hook
 
     def forward(self, x):
-        return self.model(x), self.selected_output
+        return self.model(x)#, self.selected_output
 
