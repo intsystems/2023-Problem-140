@@ -30,7 +30,7 @@ class GraphInterperterWithGumbelSoftmaxGamma(GraphInterperterWithGamma):
         return self.last_sample
         
     def make_gammas_discrete(self):
-        self.gammas.data = (self.gammas.data>=0) * 1.0
+        self.gammas = (self.gammas.clone().detach()>=0) * 1.0
         self.gammas.requires_grad = False 
         self.discrete = True
         
