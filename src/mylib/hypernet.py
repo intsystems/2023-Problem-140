@@ -15,4 +15,4 @@ class ConstHypernet(nn.Module):
         self.gammas = torch.nn.Parameter(self.gammas, requires_grad=True)
         
     def forward(self, lambd: torch.Tensor):
-        return self.gammas + 0
+        return self.gammas + 0 # `+ 0` makes parameter tensor just tensor
