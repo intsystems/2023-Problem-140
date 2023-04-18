@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from nas.module2graph import GraphInterperterWithGamma
+from mylib.nas.module2graph import GraphInterperterWithGamma
 
 class GraphInterperterWithGumbelSoftmaxGamma(GraphInterperterWithGamma):
     def __init__(self, mod, gamma_shift=0.0, temperature=1.0):
