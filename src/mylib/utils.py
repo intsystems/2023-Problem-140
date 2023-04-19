@@ -42,3 +42,24 @@ def train_epoch(hypernet, backbone, optimizer, *, sample_lambd, dl, loss_fn, tim
         loss.backward()
 
         optimizer.step()
+
+
+def add_report(reports, discrete, backbone, **validate_kwargs):
+    if discrete:
+        backbone.make_gammas_discrete()
+
+    acc, loss, lat = validate(backbone, **validate_kwargs)
+
+    for report in reports:
+        report['acc'].append(acc)
+        report['loss'].append(loss)
+        report['lat'].append(lat)
+
+    if discrete:
+        backbone.make_gammas_relaxed()
+
+
+def one_hot(i: int, n: int):
+    result = [0.] * n
+    result[i] = 1
+    return torch.tensor(result)
