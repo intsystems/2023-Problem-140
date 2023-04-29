@@ -4,7 +4,7 @@ import torch
 
 from utils import add_report, train_epoch, validate
 from hypernet import ConstHypernet
-import utils
+import mylib.utils
 
 
 class BasicExperiment:
