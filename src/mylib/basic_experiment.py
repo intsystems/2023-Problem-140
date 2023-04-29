@@ -3,7 +3,7 @@ from tqdm import tqdm, tqdm_notebook
 import torch
 
 from mylib.utils import add_report, train_epoch, validate
-from hypernet import ConstHypernet
+from mylib.hypernet import ConstHypernet
 
 
 class BasicExperiment:
