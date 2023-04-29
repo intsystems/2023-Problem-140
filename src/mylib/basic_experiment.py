@@ -44,7 +44,7 @@ class BasicExperiment:
 
         assert backbone in {"current", "full", "empty"}
 
-        backbone_gammas = self.backbone.gammas.copy()
+        backbone_gammas = self.backbone.gammas.clone()
 
         if backbone == "current":
             pass
