@@ -2,9 +2,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm, tqdm_notebook
 import torch
 
-from utils import add_report, train_epoch, validate
+from mylib.utils import add_report, train_epoch, validate
 from hypernet import ConstHypernet
-import mylib.utils
 
 
 class BasicExperiment:
