@@ -63,8 +63,8 @@ class BasicExperiment:
 
 
     def plot_convergence_single(self, history, base, *, epochs, ylim, ylim_margin=0.05, color):
-        plt.plot([base]*(epochs+1), label='full', ls=':', color=color)
-        plt.plot(history, label='basic')
+        plt.plot([base]*(epochs+1), label='full', ls=':')
+        plt.plot(history, label='basic', color=color)
         plt.ylim(ylim[0] - ylim_margin, ylim[1] + ylim_margin)
 
 
