@@ -62,13 +62,13 @@ class BasicExperiment:
         return acc, loss, lat
 
 
-    def plot_convergence_single(self, history, base, *, epochs=15, ylim, ylim_margin=0.05):
-        plt.plot([base]*(epochs+1), label='full', ls=':')
+    def plot_convergence_single(self, history, base, *, epochs, ylim, ylim_margin=0.05, color):
+        plt.plot([base]*(epochs+1), label='full', ls=':', color=color)
         plt.plot(history, label='basic')
         plt.ylim(ylim[0] - ylim_margin, ylim[1] + ylim_margin)
 
 
-    def plot_convergence(self, report, full_report, empty_report, tag: str,
+    def plot_convergence(self, report, full_report, empty_report,
                          epochs=15, save_path=None):
         w = 4
         plt.figure(figsize=(w*4, 6))
@@ -76,14 +76,18 @@ class BasicExperiment:
         for i, (lambd, report) in enumerate(report.items(), 1):
             plt.subplot(3, w, i)
             plt.title(rf"$\lambda={lambd}$")
-            self.plot_convergence_single(report['acc'], full_report['acc'], ylim=(empty_report['acc'], full_report['acc']))
+            self.plot_convergence_single(
+                report['acc'], full_report['acc'], epochs=epochs,
+                ylim=(empty_report['acc'], full_report['acc']), color='C1')
             if i == 1:
                 plt.ylabel('accuracy')
             if i == 4:
                 plt.legend()
 
             plt.subplot(3, w, i + w)
-            self.plot_convergence_single(report['lat'], full_report['lat'], ylim=(empty_report['lat'], full_report['lat']))
+            self.plot_convergence_single(
+                report['lat'], full_report['lat'], epochs=epochs,
+                ylim=(empty_report['lat'], full_report['lat']), color='C2')
             if i == 1:
                 plt.ylabel('latency')
             if i == 4:
@@ -111,7 +115,7 @@ class BasicExperiment:
         plt.ylim(ylim[0]-ylim_margin, ylim[1]+ylim_margin)
         plt.legend()
 
-    def plot_vs_lambda(self, relaxed_report, discrete_report, full_report, empty_report, tag: str,
+    def plot_vs_lambda(self, relaxed_report, discrete_report, full_report, empty_report,
                        save_path=None):
         accs = [r['acc'][-1] for l, r in relaxed_report.items()]
         lats = [r['lat'][-1] for l, r in relaxed_report.items()]
@@ -119,7 +123,7 @@ class BasicExperiment:
         plt.figure(figsize=(6,6))
 
         plt.subplot(2, 2, 1)
-        plt.title(f'relaxed {tag}')
+        plt.title(f'relaxed')
         self.plot_vs_lambda_single(accs, full_report['acc'], ylim=(empty_report['acc'], full_report['acc']), color='C1')
         plt.ylabel('accuracy')
 
@@ -131,7 +135,7 @@ class BasicExperiment:
         lats = [r['lat'][-1] for l, r in discrete_report.items()]
 
         plt.subplot(2, 2, 2)
-        plt.title(f'discrete {tag}')
+        plt.title(f'discrete')
         self.plot_vs_lambda_single(accs, full_report['acc'], ylim=(empty_report['acc'], full_report['acc']), color='C1')
 
         plt.subplot(2, 2, 4)
@@ -141,7 +145,7 @@ class BasicExperiment:
             plt.savefig(save_path, bbox_inches='tight')
 
 
-    def plot_abl1(self, report, gaccs, glats, tag: str,
+    def plot_abl1(self, report, gaccs, glats,
                   exclude_points:set={}, exclude_points_greedy:set={3,4, 6,7},
                   text_offset=(-0.01, -0.06), save_path=None):
         accs = [r['acc'][-1] for l, r in report.items()]
@@ -177,7 +181,7 @@ class BasicExperiment:
             plt.savefig(save_path, bbox_inches='tight')
 
 
-    def plot_abl2(self, relaxed_report, discrete_report, tag,
+    def plot_abl2(self, relaxed_report, discrete_report,
                   exclude_points: set={}, text_offset=(0.01, -0.02),
                   value_tag='acc', value_label='accuracy', save_path=None):
         plt.figure(figsize=(4,4))
@@ -188,7 +192,7 @@ class BasicExperiment:
         worst_acc = min(min(diss), min(rels))
         best_acc = max(max(diss), max(rels))
 
-        plt.plot([worst_acc, best_acc], [worst_acc, best_acc], ls='--', color='green', label='id')
+        plt.plot([worst_acc, best_acc], [worst_acc, best_acc], ls='--', color='C1', label='id')
         plt.scatter(diss, rels, label='actual')
         plt.plot(diss, rels)
 
