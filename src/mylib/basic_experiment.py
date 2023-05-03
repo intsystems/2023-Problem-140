@@ -68,7 +68,7 @@ class BasicExperiment:
         plt.ylim(ylim[0] - ylim_margin, ylim[1] + ylim_margin)
 
     def plot_convergence(self, report, full_report, empty_report, *,
-                         epochs=15, save_path=None, lambds=None):
+                         epochs=15, lambds=None):
         if lambds is None:
             lambds = self.lambds
 
@@ -109,9 +109,6 @@ class BasicExperiment:
                 plt.legend()
             plt.xlabel('epoch')
 
-        if save_path is not None:
-            plt.savefig(save_path, bbox_inches='tight')
-
 
     def plot_vs_lambda_single(self, values, base, *, ylim, ylim_margin=0.05, color):
         plt.plot(self.lambds, [base] * len(values), label='base', ls=':')
@@ -120,8 +117,7 @@ class BasicExperiment:
         plt.ylim(ylim[0]-ylim_margin, ylim[1]+ylim_margin)
         plt.legend()
 
-    def plot_vs_lambda(self, relaxed_report, discrete_report, full_report, empty_report,
-                       save_path=None):
+    def plot_vs_lambda(self, relaxed_report, discrete_report, full_report, empty_report):
         accs = [r['acc'][-1] for l, r in relaxed_report.items()]
         lats = [r['lat'][-1] for l, r in relaxed_report.items()]
 
@@ -146,13 +142,10 @@ class BasicExperiment:
         plt.subplot(2, 2, 4)
         self.plot_vs_lambda_single(lats, full_report['lat'], ylim=(empty_report['lat'], full_report['lat']), color='C2')
 
-        if save_path is not None:
-            plt.savefig(save_path, bbox_inches='tight')
-
 
     def plot_abl1(self, report, gaccs, glats,
                   exclude_points:set={}, exclude_points_greedy:set={3,4, 6,7},
-                  text_offset=(-0.01, -0.06), save_path=None):
+                  text_offset=(-0.01, -0.06)):
         accs = [r['acc'][-1] for l, r in report.items()]
         lats = [r['lat'][-1] for l, r in report.items()]
 
@@ -182,13 +175,10 @@ class BasicExperiment:
 
         plt.legend()
 
-        if save_path is not None:
-            plt.savefig(save_path, bbox_inches='tight')
-
 
     def plot_abl2(self, relaxed_report, discrete_report,
                   exclude_points: set={}, text_offset=(0.01, -0.02),
-                  value_tag='acc', value_label='accuracy', save_path=None):
+                  value_tag='acc', value_label='accuracy'):
         plt.figure(figsize=(4,4))
 
         diss = [report[value_tag][-1] for _, report in discrete_report.items()]
@@ -210,6 +200,3 @@ class BasicExperiment:
         plt.ylabel(f'{value_label} (relaxed model)')
 
         plt.legend()
-
-        if save_path is not None:
-            plt.savefig(save_path, bbox_inches='tight')
