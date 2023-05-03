@@ -67,14 +67,19 @@ class BasicExperiment:
         plt.plot(history, label='basic', color=color)
         plt.ylim(ylim[0] - ylim_margin, ylim[1] + ylim_margin)
 
+    def plot_convergence(self, report, full_report, empty_report, *,
+                         epochs=15, save_path=None, lambds=None):
+        if lambds is None:
+            lambds = self.lambds
 
-    def plot_convergence(self, report, full_report, empty_report,
-                         epochs=15, save_path=None):
-        w = 4
-        plt.figure(figsize=(w*4, 6))
+        width = len(lambds)
+        plt.figure(figsize=(width*4, 6))
 
         for i, (lambd, report) in enumerate(report.items(), 1):
-            plt.subplot(3, w, i)
+            if lambd not in lambds:
+                continue
+
+            plt.subplot(3, width, i)
             plt.title(rf"$\lambda={lambd}$")
             self.plot_convergence_single(
                 report['acc'], full_report['acc'], epochs=epochs,
@@ -84,7 +89,7 @@ class BasicExperiment:
             if i == 4:
                 plt.legend()
 
-            plt.subplot(3, w, i + w)
+            plt.subplot(3, width, i + width)
             self.plot_convergence_single(
                 report['lat'], full_report['lat'], epochs=epochs,
                 ylim=(empty_report['lat'], full_report['lat']), color='C2')
@@ -93,7 +98,7 @@ class BasicExperiment:
             if i == 4:
                 plt.legend()
 
-            plt.subplot(3, w, i + 2*w)
+            plt.subplot(3, width, i + 2*width)
             loss_history = [loss + lambd*lat for loss, lat in zip(report['loss'], report['lat'])]
             plt.plot([empty_report['loss'] + lambd]*(epochs+1), label='worst w/ regularization', ls=':')
             plt.plot([full_report['loss']]*(epochs+1), label='full w/o regularization', ls=':')
