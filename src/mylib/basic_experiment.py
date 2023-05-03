@@ -143,12 +143,9 @@ class BasicExperiment:
         self.plot_vs_lambda_single(lats, full_report['lat'], ylim=(empty_report['lat'], full_report['lat']), color='C2')
 
 
-    def plot_abl1(self, report, gaccs, glats,
+    def plot_abl1(self, accs, lats, gaccs, glats,
                   exclude_points:set={}, exclude_points_greedy:set={3,4, 6,7},
                   text_offset=(-0.01, -0.06)):
-        accs = [r['acc'][-1] for l, r in report.items()]
-        lats = [r['lat'][-1] for l, r in report.items()]
-
         plt.figure(figsize=(5,4))
 
         plt.scatter(lats, accs, label='basic')
