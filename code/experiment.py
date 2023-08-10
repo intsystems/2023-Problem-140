@@ -271,6 +271,8 @@ if __name__ == "__main__":
                 lambda_report[f'{lambd}'].setdefault('acc', []).append(acc)
                 lambda_report[f'{lambd}'].setdefault('latency', []).append(latency)
 
+    print('report', lambda_report)
+    
 
     # collect vs lambda
 
@@ -287,32 +289,15 @@ if __name__ == "__main__":
         latency_vs_lambda.append(latency)
         accuracy_vs_lambda.append(accuracy)
 
+    
     print('acc vs lambda', accuracy_vs_lambda)
     print('lat vs lambda', latency_vs_lambda)
-    print()
-
-    print('(acc diff, 1/lat)')
-    print(*zip([acc - base_accuracy for acc in accuracy_vs_lambda], [1 / lat for lat in latency_vs_lambda]), sep='\n')
-
 
     # plot
 
     if figures:
-        plt.figure(figsize=(5,3))
-
-        plt.xticks(list(range(10)))
-        plt.plot(lambd_grid, [base_accuracy] * len(lambd_grid), label='base', ls=':')
-        plt.plot(lambd_grid, accuracy_vs_lambda, label='acc')
-        plt.plot(lambd_grid, latency_vs_lambda, label='lat')
-        plt.legend()
-
-        plt.xlabel(r'$\lambda$')
-
-        plt.savefig(f'{figures}/lat&acc-lambd.pdf', bbox_inches='tight')
-
-    if figures:
+        # convergence
         fig, axs = plt.subplots(2, 5, figsize=(20, 6))
-
         for i, key in enumerate(lambda_report):
             h, w = i//5, i%5
             axs[h][w].set_title(rf"$\lambda={key}$")
@@ -321,5 +306,15 @@ if __name__ == "__main__":
             axs[h][w].plot(lambda_report[key]['latency'], label='lat')
             axs[h][w].legend()
             axs[h][w].set_ylim(0, 1)
-
         plt.savefig(f'{figures}/convergence.pdf', bbox_inches='tight')
+
+        # vs lambda
+
+        plt.figure(figsize=(5,3))
+        plt.xticks(list(range(10)))
+        plt.plot(lambd_grid, [base_accuracy] * len(lambd_grid), label='base', ls=':')
+        plt.plot(lambd_grid, accuracy_vs_lambda, label='acc')
+        plt.plot(lambd_grid, latency_vs_lambda, label='lat')
+        plt.legend()
+        plt.xlabel(r'$\lambda$')
+        plt.savefig(f'{figures}/lat&acc-lambd.pdf', bbox_inches='tight')
