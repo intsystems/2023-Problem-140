@@ -20,46 +20,6 @@ import matplotlib.pyplot as plt
 # mpl.style.use('seaborn')
 
 
-class GraphInterperterWithGumbelSoftmaxGamma(GraphInterperterWithGamma):
-    def __init__(self, mod, gamma_shift=0.0, temperature=1.0):
-        self.gamma_shift = gamma_shift
-        self.temperature = temperature
-        super().__init__(mod)
-
-    def init_gammas(self):
-        i = 0
-        gammas = []
-        self.gammas_name = {}
-        self.atomic_operations = []
-        for node in self.graph.nodes:
-            if node.op == 'call_module':
-                self.atomic_operations.append(node)
-                gammas.append(np.random.randn()+self.gamma_shift)
-                self.gammas_name[str(node)] = i# перевод в str тут для удобства. в реалньых методах это не нужно
-                i+=1                        # да и вообще, тут по идее должен быть тензор/параметр
-        self.gammas = torch.as_tensor(gammas).to(device)
-        self.discrete = False 
-
-    def sample_gammas(self, previous=False):
-        if self.discrete:
-            return self.gammas
-
-        if not previous:
-            d = torch.distributions.RelaxedBernoulli(logits=self.gammas, temperature=self.temperature)
-            self.last_sample = d.rsample()
-
-        return self.last_sample
-        
-    def make_gammas_discrete(self):
-        self.gammas.data = (self.gammas.data>0) * 1.0
-        self.discrete = True
-
-    def relax_gammas(self, gammas=None):
-        if gammas is not None:
-            self.gammas.data = gammas.data
-        self.discrete = False
-
-
 class HyperNet(nn.Module):
     def __init__(self, out_size, hidden_layer_num=1, hidden_size=128):
         """
@@ -155,6 +115,48 @@ if __name__ == "__main__":
 
 
     # interpreter
+
+    class GraphInterperterWithGumbelSoftmaxGamma(GraphInterperterWithGamma):
+        def __init__(self, mod, gamma_shift=0.0, temperature=1.0):
+            self.gamma_shift = gamma_shift
+            self.temperature = temperature
+            super().__init__(mod)
+    
+        def init_gammas(self):
+            i = 0
+            gammas = []
+            self.gammas_name = {}
+            self.atomic_operations = []
+            for node in self.graph.nodes:
+                if node.op == 'call_module':
+                    self.atomic_operations.append(node)
+                    gammas.append(np.random.randn()+self.gamma_shift)
+                    self.gammas_name[str(node)] = i# перевод в str тут для удобства. в реалньых методах это не нужно
+                    i+=1                        # да и вообще, тут по идее должен быть тензор/параметр
+            self.gammas = torch.as_tensor(gammas).to(device)
+            self.discrete = False 
+    
+        def sample_gammas(self, previous=False):
+            if self.discrete:
+                return self.gammas
+    
+            if not previous:
+                d = torch.distributions.RelaxedBernoulli(logits=self.gammas, temperature=self.temperature)
+                self.last_sample = d.rsample()
+    
+            return self.last_sample
+            
+        def make_gammas_discrete(self):
+            self.gammas.data = (self.gammas.data>0) * 1.0
+            self.discrete = True
+    
+        def relax_gammas(self, gammas=None):
+            if gammas is not None:
+                self.gammas.data = gammas.data
+            self.discrete = False
+
+
+    # model
 
     model = ResNet18(num_classes=10).to(device)
     model.load_state_dict(torch.load(path_to_model))
