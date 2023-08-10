@@ -193,6 +193,8 @@ if __name__ == "__main__":
 
     # init gammas
 
+    print('finding init gammas...')
+
     current_accuracy = worst_accuracy
     curr_shift = 4.0
     init_gammas = None
