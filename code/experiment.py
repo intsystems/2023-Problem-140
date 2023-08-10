@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
             optimizer.step()
 
-    EPOCHS = 20
+    EPOCHS = 25
 
     temperature = 0.3
 
