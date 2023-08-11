@@ -103,6 +103,8 @@ if __name__ == "__main__":
                         help='number of training epochs')
     parser.add_argument("--image-size", type=int, default=33,
                         help='desired output size of the crop (default: 33)')
+    parser.add_argument("--init-shift", type=float, default=4.0)
+    parser.add_argument("--delta-shift", type=float, default=0.5)
     args = parser.parse_args()
 
     device = args.device
@@ -114,6 +116,8 @@ if __name__ == "__main__":
     Lambd = args.lambd
     epochs = args.epochs
     image_size = args.image_size
+    init_shift = args.init_shift
+    delta_shift = args.delta_shift
 
 
     # mylib
@@ -208,7 +212,7 @@ if __name__ == "__main__":
     print('finding init gammas...')
 
     current_accuracy = worst_accuracy
-    curr_shift = 4.0
+    curr_shift = init_shift
     init_gammas = None
 
     while current_accuracy <= 0.4:
@@ -217,8 +221,7 @@ if __name__ == "__main__":
 
         print(current_accuracy, curr_shift)
         
-        curr_shift += 0.5
-    curr_shift -= 0.5
+        curr_shift += delta_shift
 
     init_gammas = imodel.gammas
     init_gammas.sigmoid()
