@@ -101,6 +101,8 @@ if __name__ == "__main__":
                         help='upper bound for lambda such that the graph is connected')
     parser.add_argument("--epochs", type=int,
                         help='number of training epochs')
+    parser.add_argument("--image-size", type=int, default=33,
+                        help='desired output size of the crop (default: 33)')
     args = parser.parse_args()
 
     device = args.device
@@ -111,6 +113,7 @@ if __name__ == "__main__":
     dataset = args.dataset
     Lambd = args.lambd
     epochs = args.epochs
+    image_size = args.image_size
 
 
     # mylib
@@ -173,7 +176,7 @@ if __name__ == "__main__":
 
     # data & times
 
-    train_dl, test_dl = get_dataloaders(dataset, img_size=33)
+    train_dl, test_dl = get_dataloaders(dataset, img_size=image_size)
 
     times = pd.read_csv(path_to_times, index_col=0)
     times = torch.tensor(times['mean'], dtype=torch.float32).to(device)
