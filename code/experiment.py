@@ -95,6 +95,17 @@ if __name__ == "__main__":
                         help='path to times (deafult: time_measurements/ResNet18HomeMeasurements.csv)')
     parser.add_argument("--repo",  default='2023-Problem-140',
                         help='path to repo (deafult: 2023-Problem-140)')
+    parser.add_argument("--dataset",  default='CIFAR10',
+                        help='CIFAR10, CIFAR100, or ImageNet (deafult: CIFAR10)')
+    parser.add_argument("--lambd", type=float, default=10.0,
+                        help='upper bound for lambda such that the graph is connected')
+    parser.add_argument("--epochs", type=int, default=25,
+                        help='number of training epochs')
+    parser.add_argument("--image-size", type=int, default=33,
+                        help='desired output size of the crop (default: 33)')
+    parser.add_argument("--init-shift", type=float, default=4.0)
+    parser.add_argument("--delta-shift", type=float, default=0.5)
+    parser.add_argument("--init-accuracy", type=float, default=0.4)
     args = parser.parse_args()
 
     device = args.device
@@ -102,6 +113,13 @@ if __name__ == "__main__":
     path_to_model = args.model
     path_to_times = args.times
     path_to_repo = args.repo
+    dataset = args.dataset
+    Lambd = args.lambd
+    epochs = args.epochs
+    image_size = args.image_size
+    init_shift = args.init_shift
+    delta_shift = args.delta_shift
+    init_accuracy = args.init_accuracy
 
 
     # mylib
@@ -111,7 +129,7 @@ if __name__ == "__main__":
 
     from mylib.nas.resnet18 import ResNet18
     from mylib.nas.module2graph import GraphInterperterWithGamma
-    from mylib.nas.cifar_data import get_dataloaders
+    from mylib.dataloader import get_dataloaders
 
 
     # interpreter
@@ -164,7 +182,7 @@ if __name__ == "__main__":
 
     # data & times
 
-    train_dl, test_dl = get_dataloaders(classes=range(10), batch_size=64, img_size=33)
+    train_dl, test_dl = get_dataloaders(dataset, img_size=image_size)
 
     times = pd.read_csv(path_to_times, index_col=0)
     times = torch.tensor(times['mean'], dtype=torch.float32).to(device)
@@ -196,17 +214,16 @@ if __name__ == "__main__":
     print('finding init gammas...')
 
     current_accuracy = worst_accuracy
-    curr_shift = 4.0
+    curr_shift = init_shift
     init_gammas = None
 
-    while current_accuracy <= 0.4:
+    while current_accuracy <= init_accuracy:
         imodel.gammas = torch.randn(*imodel.gammas.shape).to(device) + curr_shift
         current_accuracy, _, _ = validate(imodel, test_dl, device, ACC)
 
         print(current_accuracy, curr_shift)
         
-        curr_shift += 0.5
-    curr_shift -= 0.5
+        curr_shift += delta_shift
 
     init_gammas = imodel.gammas
     init_gammas.sigmoid()
@@ -214,7 +231,6 @@ if __name__ == "__main__":
 
     # init hypernet
 
-    Lambd = 10.0
     n_intervals = 10
 
     hypernet = PwHypernet(n_intervals=n_intervals, out_size=imodel.gammas.numel(), Lambd=Lambd).to(device)
@@ -247,13 +263,11 @@ if __name__ == "__main__":
 
             optimizer.step()
 
-    EPOCHS = 25
-
     temperature = 0.3
 
     lambda_report = {}
 
-    for epoch in tqdm(range(EPOCHS), desc='training', total=EPOCHS):
+    for epoch in tqdm(range(epochs), desc='training', total=epochs):
         hypernet.train()
 
         train_epoch(imodel, hypernet, optimizer, temperature=temperature)
@@ -303,7 +317,7 @@ if __name__ == "__main__":
         for i, key in enumerate(lambda_report):
             h, w = i//5, i%5
             axs[h][w].set_title(rf"$\lambda={key}$")
-            axs[h][w].plot([base_accuracy]*EPOCHS, label='base', ls=':')
+            axs[h][w].plot([base_accuracy]*epochs, label='base', ls=':')
             axs[h][w].plot(lambda_report[key]['acc'], label='acc')
             axs[h][w].plot(lambda_report[key]['latency'], label='lat')
             axs[h][w].legend()
