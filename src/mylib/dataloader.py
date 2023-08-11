@@ -10,7 +10,7 @@ def get_dataloaders(dataset_name, *, batch_size: int = 64, img_size: int = 33):
 
 
 def get_dataloader(dataset_name, *, train: bool, batch_size: int = 64, img_size: int = 33):
-    transform = get_transform(train, img_size=img_size)
+    transform = get_transform(train=train, img_size=img_size)
     dataset = get_dataset(dataset_name, train=train, transform=transform)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=train, num_workers=2)
     return dataloader
