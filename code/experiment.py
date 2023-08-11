@@ -99,6 +99,8 @@ if __name__ == "__main__":
                         help='CIFAR10, CIFAR100, or ImageNet (deafult: CIFAR10)')
     parser.add_argument("--lambd", type=float,
                         help='upper bound for lambda such that the graph is connected')
+    parser.add_argument("--epochs", type=int,
+                        help='number of training epochs')
     args = parser.parse_args()
 
     device = args.device
@@ -108,6 +110,7 @@ if __name__ == "__main__":
     path_to_repo = args.repo
     dataset = args.dataset
     Lambd = args.lambd
+    epochs = args.epochs
 
 
     # mylib
@@ -252,13 +255,11 @@ if __name__ == "__main__":
 
             optimizer.step()
 
-    EPOCHS = 25
-
     temperature = 0.3
 
     lambda_report = {}
 
-    for epoch in tqdm(range(EPOCHS), desc='training', total=EPOCHS):
+    for epoch in tqdm(range(epochs), desc='training', total=epochs):
         hypernet.train()
 
         train_epoch(imodel, hypernet, optimizer, temperature=temperature)
@@ -308,7 +309,7 @@ if __name__ == "__main__":
         for i, key in enumerate(lambda_report):
             h, w = i//5, i%5
             axs[h][w].set_title(rf"$\lambda={key}$")
-            axs[h][w].plot([base_accuracy]*EPOCHS, label='base', ls=':')
+            axs[h][w].plot([base_accuracy]*epochs, label='base', ls=':')
             axs[h][w].plot(lambda_report[key]['acc'], label='acc')
             axs[h][w].plot(lambda_report[key]['latency'], label='lat')
             axs[h][w].legend()
