@@ -95,6 +95,8 @@ if __name__ == "__main__":
                         help='path to times (deafult: time_measurements/ResNet18HomeMeasurements.csv)')
     parser.add_argument("--repo",  default='2023-Problem-140',
                         help='path to repo (deafult: 2023-Problem-140)')
+    parser.add_argument("--dataset",  default='CIFAR10',
+                        help='CIFAR10, CIFAR100, or ImageNet (deafult: CIFAR10)')
     args = parser.parse_args()
 
     device = args.device
@@ -102,6 +104,7 @@ if __name__ == "__main__":
     path_to_model = args.model
     path_to_times = args.times
     path_to_repo = args.repo
+    dataset = args.dataset
 
 
     # mylib
@@ -111,7 +114,7 @@ if __name__ == "__main__":
 
     from mylib.nas.resnet18 import ResNet18
     from mylib.nas.module2graph import GraphInterperterWithGamma
-    from mylib.nas.cifar_data import get_dataloaders
+    from mylib.dataloader import get_dataloaders
 
 
     # interpreter
@@ -164,7 +167,7 @@ if __name__ == "__main__":
 
     # data & times
 
-    train_dl, test_dl = get_dataloaders(classes=range(10), batch_size=64, img_size=33)
+    train_dl, test_dl = get_dataloaders(dataset, img_size=33)
 
     times = pd.read_csv(path_to_times, index_col=0)
     times = torch.tensor(times['mean'], dtype=torch.float32).to(device)
