@@ -97,9 +97,9 @@ if __name__ == "__main__":
                         help='path to repo (deafult: 2023-Problem-140)')
     parser.add_argument("--dataset",  default='CIFAR10',
                         help='CIFAR10, CIFAR100, or ImageNet (deafult: CIFAR10)')
-    parser.add_argument("--lambd", type=float,
+    parser.add_argument("--lambd", type=float, default=10.0,
                         help='upper bound for lambda such that the graph is connected')
-    parser.add_argument("--epochs", type=int,
+    parser.add_argument("--epochs", type=int, default=25,
                         help='number of training epochs')
     parser.add_argument("--image-size", type=int, default=33,
                         help='desired output size of the crop (default: 33)')
