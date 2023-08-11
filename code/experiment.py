@@ -105,6 +105,7 @@ if __name__ == "__main__":
                         help='desired output size of the crop (default: 33)')
     parser.add_argument("--init-shift", type=float, default=4.0)
     parser.add_argument("--delta-shift", type=float, default=0.5)
+    parser.add_argument("--init-accuracy", type=float, default=0.4)
     args = parser.parse_args()
 
     device = args.device
@@ -118,6 +119,7 @@ if __name__ == "__main__":
     image_size = args.image_size
     init_shift = args.init_shift
     delta_shift = args.delta_shift
+    init_accuracy = args.init_accuracy
 
 
     # mylib
@@ -215,7 +217,7 @@ if __name__ == "__main__":
     curr_shift = init_shift
     init_gammas = None
 
-    while current_accuracy <= 0.4:
+    while current_accuracy <= init_accuracy:
         imodel.gammas = torch.randn(*imodel.gammas.shape).to(device) + curr_shift
         current_accuracy, _, _ = validate(imodel, test_dl, device, ACC)
 
