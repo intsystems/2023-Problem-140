@@ -97,6 +97,8 @@ if __name__ == "__main__":
                         help='path to repo (deafult: 2023-Problem-140)')
     parser.add_argument("--dataset",  default='CIFAR10',
                         help='CIFAR10, CIFAR100, or ImageNet (deafult: CIFAR10)')
+    parser.add_argument("--lambd", type=float,
+                        help='upper bound for lambda such that the graph is connected')
     args = parser.parse_args()
 
     device = args.device
@@ -105,6 +107,7 @@ if __name__ == "__main__":
     path_to_times = args.times
     path_to_repo = args.repo
     dataset = args.dataset
+    Lambd = args.lambd
 
 
     # mylib
@@ -217,7 +220,6 @@ if __name__ == "__main__":
 
     # init hypernet
 
-    Lambd = 10.0
     n_intervals = 10
 
     hypernet = PwHypernet(n_intervals=n_intervals, out_size=imodel.gammas.numel(), Lambd=Lambd).to(device)
