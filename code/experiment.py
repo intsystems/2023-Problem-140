@@ -74,10 +74,10 @@ if __name__ == "__main__":
     import sys
     sys.path.append(f'{path_to_repo}/src')
 
-    from mylib.nas.resnet18 import ResNet18
     from mylib.nas.module2graph import GraphInterperterWithGamma
     from mylib.dataloader import get_dataloaders
     from mylib.validate import validate, ACC, LOSS, LAT
+    from mylib.model import ResNet18
 
 
     # interpreter
@@ -124,10 +124,7 @@ if __name__ == "__main__":
 
     # model
 
-    model = ResNet18(num_classes=10).to(device)
-    model.load_state_dict(torch.load(path_to_model))
-    model.to(device)
-
+    model = ResNet18(dataset, path_to_model=path_to_model).to(device)
 
     # data & times
 
