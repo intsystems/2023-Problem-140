@@ -14,7 +14,7 @@ def vs_lambd(lambd_grid, *args, saveto):
     plt.figure(figsize=(4*len(args), 3))
     for i, (values, base, label) in enumerate(args, 1):
         plt.subplot(1, len(args), i)
-        plt.xticks(lambd_grid)
+        plt.xticks(list(map(float, lambd_grid)))
         plt.plot(lambd_grid, [base] * len(lambd_grid), label='base', ls=':')
         plt.plot(lambd_grid, values, label=label)
         plt.xlabel(r'$\lambda$')

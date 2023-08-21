@@ -243,8 +243,8 @@ if __name__ == "__main__":
 
     # collect vs lambda
 
-    acc_vs_lambda = [r[-1] for _, r in lambda_report['acc']]
-    lat_vs_lambda = [r[-1] for _, r in lambda_report['lat']]
+    acc_vs_lambda = [r[-1] for _, r in lambda_report['acc'].items()]
+    lat_vs_lambda = [r[-1] for _, r in lambda_report['lat'].items()]
 
     print('lambda grid', lambd_grid)
     print('acc vs lambda', acc_vs_lambda)
