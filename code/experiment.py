@@ -29,32 +29,6 @@ class PwHypernet(nn.Module):
         return self.intervals[idx]
 
 
-loss_fn = torch.nn.CrossEntropyLoss()
-ACC, LOSS, LAT = {'accuracy'}, {'loss'}, {'latency'}
-ALL = ACC | LOSS | LAT
-@torch.no_grad()
-def validate(model, dataloader, device, getters: set=ALL):
-    n_true, n_tot = 0, 0
-    loss, latency = 0, 0
-
-    for i, (X, y) in enumerate(dataloader):
-        if X.shape[0] != 64:
-            continue
-
-        y_pred = model(X.to(device))
-
-        n_tot += 64
-
-        if 'accuracy' in getters:
-            n_true += (y_pred.argmax(-1) == y.to(device)).sum().item()
-        if 'loss' in getters:
-            loss += loss_fn(y_pred, y.to(device)).item() * 64
-        if 'latency' in getters:
-            latency += model.sample_gammas(previous=True).dot(times).item() * 64
-
-    return n_true / n_tot, loss / n_tot, latency / n_tot
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -103,6 +77,7 @@ if __name__ == "__main__":
     from mylib.nas.resnet18 import ResNet18
     from mylib.nas.module2graph import GraphInterperterWithGamma
     from mylib.dataloader import get_dataloaders
+    from mylib.validate import validate, ACC, LOSS, LAT
 
 
     # interpreter
@@ -151,6 +126,7 @@ if __name__ == "__main__":
 
     model = ResNet18(num_classes=10).to(device)
     model.load_state_dict(torch.load(path_to_model))
+    model.to(device)
 
 
     # data & times
@@ -161,10 +137,11 @@ if __name__ == "__main__":
     times = torch.tensor(times['mean'], dtype=torch.float32).to(device)
     times /= times.sum()
 
+    loss_fn = torch.nn.CrossEntropyLoss()
 
     # base (full graph)
 
-    base_accuracy, base_loss, _ = validate(model.to(device), test_dl, device, ACC | LOSS)
+    base_accuracy, base_loss, _ = validate(model, test_dl, ACC | LOSS, loss_fn=loss_fn, device=device)
     print('base:', base_accuracy, base_loss)
 
 
@@ -175,7 +152,7 @@ if __name__ == "__main__":
     imodel.gammas = torch.zeros_like(imodel.gammas).to(device)
     imodel.make_gammas_discrete()
 
-    worst_accuracy, worst_loss, _ = validate(imodel, test_dl, device, ACC | LOSS)
+    worst_accuracy, worst_loss, _ = validate(imodel, test_dl, ACC | LOSS, loss_fn=loss_fn, device=device)
 
     imodel.relax_gammas()
 
@@ -192,7 +169,7 @@ if __name__ == "__main__":
 
     while current_accuracy <= init_accuracy:
         imodel.gammas = torch.randn(*imodel.gammas.shape).to(device) + curr_shift
-        current_accuracy, _, _ = validate(imodel, test_dl, device, ACC)
+        current_accuracy, _, _ = validate(imodel, test_dl, ACC, device=device)
 
         print(current_accuracy, curr_shift)
         
@@ -254,7 +231,7 @@ if __name__ == "__main__":
                 lambd *= Lambd / n_intervals
                 imodel.gammas = hypernet(torch.tensor(lambd))
 
-                acc, loss, latency = validate(imodel, test_dl, device)
+                acc, loss, latency = validate(imodel, test_dl, ACC | LAT, times=times, device=device)
 
                 lambda_report.setdefault(f'{lambd}', {})
                 lambda_report[f'{lambd}'].setdefault('acc', []).append(acc)
@@ -273,7 +250,7 @@ if __name__ == "__main__":
     for lambd in lambd_grid:
         imodel.gammas = hypernet(torch.tensor(lambd))
         imodel.make_gammas_discrete()
-        accuracy, _, latency = validate(imodel, test_dl, device)
+        accuracy, _, latency = validate(imodel, test_dl, ACC | LAT, times=times, device=device)
 
         latency_vs_lambda.append(latency)
         accuracy_vs_lambda.append(accuracy)
