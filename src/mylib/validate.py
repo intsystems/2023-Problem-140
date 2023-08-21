@@ -22,7 +22,8 @@ def validate(model, dataloader, getters, *, loss_fn=None, times=None, device='cp
         if 'accuracy' in getters:
             n_true += (y_pred.argmax(-1) == y).sum().item()
         if 'loss' in getters:
-            loss += loss_fn(y_pred, y, reduction='sum').item()
+            print(loss_fn.reduction)
+            loss += loss_fn(y_pred, y).item()
         if 'latency' in getters:
             latency += model.sample_gammas(previous=True).dot(times).item() * X.shape[0]
         n_tot += X.shape[0]
