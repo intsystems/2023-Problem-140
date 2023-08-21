@@ -11,9 +11,8 @@ import torch.fx
 
 from torch.distributions.uniform import Uniform
 
-import numpy as np 
+import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 class PwHypernet(nn.Module):
@@ -78,6 +77,7 @@ if __name__ == "__main__":
     from mylib.dataloader import get_dataloaders
     from mylib.validate import validate, ACC, LOSS, LAT
     from mylib.model import ResNet18
+    import mylib.plot as plot
 
 
     # interpreter
@@ -212,7 +212,12 @@ if __name__ == "__main__":
 
     temperature = 0.3
 
-    lambda_report = {}
+    lambd_grid = [i*Lambd/n_intervals for i in range(n_intervals)]
+
+    lambda_report = {
+        'acc':{str(lambd):[] for lambd in lambd_grid},
+        'lat':{str(lambd):[] for lambd in lambd_grid},
+    }
 
     for epoch in tqdm(range(epochs), desc='training', total=epochs):
         hypernet.train()
@@ -228,56 +233,25 @@ if __name__ == "__main__":
                 lambd *= Lambd / n_intervals
                 imodel.gammas = hypernet(torch.tensor(lambd))
 
-                acc, loss, latency = validate(imodel, test_dl, ACC | LAT, times=times, device=device)
+                acc, loss, lat = validate(imodel, test_dl, ACC | LOSS | LAT, loss_fn=loss_fn, times=times, device=device)
 
-                lambda_report.setdefault(f'{lambd}', {})
-                lambda_report[f'{lambd}'].setdefault('acc', []).append(acc)
-                lambda_report[f'{lambd}'].setdefault('latency', []).append(latency)
+                lambda_report['acc'][str(lambd)].append(acc)
+                lambda_report['lat'][str(lambd)].append(lat)
 
     print('report', lambda_report)
     
 
     # collect vs lambda
 
-    accuracy_vs_lambda = []
-    latency_vs_lambda = []
+    acc_vs_lambda = [r[-1] for _, r in lambda_report['acc']]
+    lat_vs_lambda = [r[-1] for _, r in lambda_report['lat']]
 
-    lambd_grid = [i*Lambd/n_intervals for i in range(n_intervals)]
-
-    for lambd in lambd_grid:
-        imodel.gammas = hypernet(torch.tensor(lambd))
-        imodel.make_gammas_discrete()
-        accuracy, _, latency = validate(imodel, test_dl, ACC | LAT, times=times, device=device)
-
-        latency_vs_lambda.append(latency)
-        accuracy_vs_lambda.append(accuracy)
-
-    
-    print('acc vs lambda', accuracy_vs_lambda)
-    print('lat vs lambda', latency_vs_lambda)
+    print('lambda grid', lambd_grid)
+    print('acc vs lambda', acc_vs_lambda)
+    print('lat vs lambda', lat_vs_lambda)
 
     # plot
 
     if figures:
-        # convergence
-        fig, axs = plt.subplots(2, 5, figsize=(20, 6))
-        for i, key in enumerate(lambda_report):
-            h, w = i//5, i%5
-            axs[h][w].set_title(rf"$\lambda={key}$")
-            axs[h][w].plot([base_accuracy]*epochs, label='base', ls=':')
-            axs[h][w].plot(lambda_report[key]['acc'], label='acc')
-            axs[h][w].plot(lambda_report[key]['latency'], label='lat')
-            axs[h][w].legend()
-            axs[h][w].set_ylim(0, 1)
-        plt.savefig(f'{figures}/convergence.pdf', bbox_inches='tight')
-
-        # vs lambda
-
-        plt.figure(figsize=(5,3))
-        plt.xticks(list(range(10)))
-        plt.plot(lambd_grid, [base_accuracy] * len(lambd_grid), label='base', ls=':')
-        plt.plot(lambd_grid, accuracy_vs_lambda, label='acc')
-        plt.plot(lambd_grid, latency_vs_lambda, label='lat')
-        plt.legend()
-        plt.xlabel(r'$\lambda$')
-        plt.savefig(f'{figures}/lat&acc-lambd.pdf', bbox_inches='tight')
+        plot.convergence(lambd_grid, (lambda_report['acc'], 'acc'), (lambda_report['lat'], 'lat'), saveto=f'{figures}/convergence.pdf')
+        plot.vs_lambd(lambd_grid, (acc_vs_lambda, base_accuracy, 'acc'), (lat_vs_lambda, 1, 'lat'), saveto=f'{figures}/vs_lambd.pdf')
