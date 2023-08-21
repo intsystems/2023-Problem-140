@@ -16,29 +16,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-class HyperNet(nn.Module):
-    def __init__(self, out_size, hidden_layer_num=1, hidden_size=128):
-        """
-        :param hidden_layer_num: количество скрытых слоев (может быть нулевым)
-        :param hidden_size: количество нейронов на скрытом слое (актуально, если скрытые слои есть)
-        :param out_size: количество параметров
-        """
-        nn.Module.__init__(self)
-
-        layers = []
-        in_ = 1 # исходная входная размерность
-        for _ in range(hidden_layer_num):
-            layers.append(nn.Linear(in_, hidden_size))
-            layers.append(nn.ReLU())
-            in_ = hidden_size
-        layers.append(nn.Linear(in_, out_size))
-
-        self.model = nn.Sequential(*layers)
-
-    def forward(self, lambd):
-        return self.model(lambd)
-
-
 class PwHypernet(nn.Module):
     def __init__(self, n_intervals:int = 5, out_size: int = 10, *, Lambd):
         super().__init__()
