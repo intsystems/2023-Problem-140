@@ -212,11 +212,11 @@ if __name__ == "__main__":
 
     temperature = 0.3
 
-    lambd_grid = [i*Lambd/n_intervals for i in range(n_intervals)]
+    lambd_grid = [str(i/n_intervals * Lambd) for i in range(n_intervals)]
 
     lambda_report = {
-        'acc':{str(lambd):[] for lambd in lambd_grid},
-        'lat':{str(lambd):[] for lambd in lambd_grid},
+        'acc':{lambd:[] for lambd in lambd_grid},
+        'lat':{lambd:[] for lambd in lambd_grid},
     }
 
     for epoch in tqdm(range(epochs), desc='training', total=epochs):
