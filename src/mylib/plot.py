@@ -5,7 +5,7 @@ def convergence(lambd_grid, *args, saveto):
     for j, (report, label) in enumerate(args):
         for i, lambd in enumerate(lambd_grid, 1):
             plt.subplot(len(args), len(lambd_grid), i + j*len(lambd_grid))
-            plt.set_title(rf"$\lambda={lambd}$")
+            plt.title(rf"$\lambda={lambd}$")
             plt.plot(report[lambd], label=label)
             plt.legend()
     plt.savefig(saveto, bbox_inches='tight')
