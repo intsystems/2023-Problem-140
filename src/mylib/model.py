@@ -5,7 +5,8 @@ from torchvision.models import resnet18, ResNet18_Weights
 
 
 class ResNet18(nn.Module):
-    def __init__(self, num_classes: int = 10):
+    def __init__(self, *args, **kwargs):
+        num_classes: int = 10
         super(ResNet18, self).__init__()
         self.selected_output = {}
         self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
