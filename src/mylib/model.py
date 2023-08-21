@@ -24,9 +24,9 @@ class ResNet18(nn.Module):
             num_classes = {'CIFAR10':10, 'CIFAR100':100}
             self.model.fc = nn.Linear(512, num_classes[dataset_name])
             self.model.load_state_dict(torch.load(path_to_model))
-            
+        self.fhooks = []
         for layer in self.model._modules.keys():
-            getattr(self.model, layer).register_forward_hook(self.forward_hook(layer))
+            self.fhooks.append(getattr(self.model, layer).register_forward_hook(self.forward_hook(layer)))
 
     def forward(self, x):
         return self.model(x)
