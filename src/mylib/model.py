@@ -5,12 +5,14 @@ from torchvision.models import resnet18, ResNet18_Weights
 
 
 class ResNet18(nn.Module):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, dataset_name, path_to_model=None):
         num_classes: int = 10
         super(ResNet18, self).__init__()
         # self.selected_output = {}
         self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
         self.model.fc = nn.Linear(512, num_classes)
+        self.load_state_dict(torch.load(path_to_model))
+        self.model.load_state_dict(torch.load(path_to_model))
         # self.fhooks = []
         # for layer in self.model._modules.keys():
         #     self.fhooks.append(getattr(self.model, layer).register_forward_hook(self.forward_hook(layer)))
