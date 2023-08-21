@@ -8,9 +8,10 @@ def convergence(lambd_grid, *args, saveto):
             plt.title(rf"$\lambda={lambd}$")
             plt.plot(report[lambd], label=label)
             plt.legend()
-    plt.savefig(saveto, bbox_inches='tight')
+    save_or_show(saveto)
 
-def vs_lambd(lambd_grid, *args, saveto):
+
+def vs_lambd(lambd_grid, *args, saveto=None):
     plt.figure(figsize=(4*len(args), 3))
     for i, (values, base, label) in enumerate(args, 1):
         plt.subplot(1, len(args), i)
@@ -19,4 +20,11 @@ def vs_lambd(lambd_grid, *args, saveto):
         plt.plot(lambd_grid, values, label=label)
         plt.xlabel(r'$\lambda$')
         plt.legend()
-    plt.savefig(saveto, bbox_inches='tight')
+    save_or_show(saveto)
+
+
+def save_or_show(saveto=None):
+    if saveto:
+        plt.savefig(saveto, bbox_inches='tight')
+    else:
+        plt.show()
