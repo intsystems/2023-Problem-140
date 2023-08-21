@@ -17,13 +17,15 @@ class ResNet18(nn.Module):
 
     def init_for(self, dataset_name, path_to_model=None):
         assert dataset_name in {'CIFAR10', 'CIFAR100', 'ImageNet'}
-        # self.model = resnet18(weights=ResNet18_Weights.DEFAULT)
-        self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
+        self.model = resnet18(weights=ResNet18_Weights.DEFAULT)
+        # self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
         if dataset_name != 'ImageNet':
             assert path_to_model != None
             num_classes = {'CIFAR10':10, 'CIFAR100':100}
             self.model.fc = nn.Linear(512, num_classes[dataset_name])
-            self.model.load_state_dict(torch.load(path_to_model))
+            sd = torch.load(path_to_model)
+            print(sd)
+            self.model.load_state_dict(sd)
         self.fhooks = []
         for layer in self.model._modules.keys():
             self.fhooks.append(getattr(self.model, layer).register_forward_hook(self.forward_hook(layer)))
